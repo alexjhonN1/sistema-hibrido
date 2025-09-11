@@ -1,9 +1,9 @@
 // src/index.js
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const authRoutes = require("./routes/auth.routes");
-
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import authRoutes from "./routes/auth.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
 dotenv.config();
 
 const app = express();
@@ -15,6 +15,7 @@ app.use(express.json());
 
 // Rutas
 app.use("/auth", authRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Servidor
 app.listen(PORT, () => {

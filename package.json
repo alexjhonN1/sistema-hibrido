@@ -1,0 +1,13 @@
+{
+  "name": "sistema-hibrido",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend-local\"",
+    "backend": "npm run dev --prefix backend",
+    "frontend": "npm run dev --prefix frontend-local"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

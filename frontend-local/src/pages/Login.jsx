@@ -1,20 +1,24 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mensaje, setMensaje] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:4000/api/auth/login", {
+      const res = await axios.post("http://localhost:4000/auth/login", {
         email,
         password,
       });
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
       setMensaje(`✅ Bienvenido: ${res.data.user.nombre}`);
-      localStorage.setItem("token", res.data.token); // guarda token en navegador
+      setTimeout(() => navigate("/dashboard"), 1000);
     } catch (err) {
       setMensaje("❌ Error en las credenciales");
     }

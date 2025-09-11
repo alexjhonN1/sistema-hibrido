@@ -3,9 +3,10 @@ import axios from "axios";
 
 function Register() {
   const [form, setForm] = useState({
-    username: "",
+    nombre: "",
     email: "",
     password: "",
+    rol: "TRABAJADOR", // opcional: valor por defecto
   });
 
   const [message, setMessage] = useState("");
@@ -23,7 +24,7 @@ function Register() {
       const res = await axios.post("http://localhost:4000/auth/register", form);
       setMessage(res.data.message || "Usuario registrado con éxito");
     } catch (err) {
-      setMessage(err.response?.data?.error || "Error en el registro");
+      setMessage(err.response?.data?.message || "Error en el registro");
     }
   };
 
@@ -34,9 +35,9 @@ function Register() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            name="username"
-            placeholder="Nombre de usuario"
-            value={form.username}
+            name="nombre"
+            placeholder="Nombre"
+            value={form.nombre}
             onChange={handleChange}
             className="w-full border p-2 rounded"
           />
@@ -56,6 +57,15 @@ function Register() {
             onChange={handleChange}
             className="w-full border p-2 rounded"
           />
+          <select
+            name="rol"
+            value={form.rol}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          >
+            <option value="TRABAJADOR">Trabajador</option>
+            <option value="ADMIN">Administrador</option>
+          </select>
           <button
             type="submit"
             className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
