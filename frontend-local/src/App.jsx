@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-ro
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import Sunat from "./pages/Sunat"; // 👈 Importar el módulo SUNAT
+import Sunat from "./pages/Sunat"; 
+import Users from "./pages/Users";
 
 function App() {
   const token = localStorage.getItem("token");
@@ -39,6 +40,10 @@ function App() {
         <Route
           path="/dashboard/sunat"
           element={token ? <Sunat /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/dashboard/users"
+          element={token ? <Users /> : <Navigate to="/login" />}
         />
 
         {/* Redirección por defecto */}
