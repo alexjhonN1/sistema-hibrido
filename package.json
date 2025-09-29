@@ -8,6 +8,17 @@
     "frontend": "npm run dev --prefix frontend-local"
   },
   "devDependencies": {
-    "concurrently": "^9.0.1"
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^9.0.1",
+    "init": "^0.1.2",
+    "npx": "^10.2.2",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.9.3",
+    "recharts": "^2.12.7"
   }
 }

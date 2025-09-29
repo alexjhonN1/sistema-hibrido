@@ -1,63 +1,81 @@
 // src/controllers/auth.controller.js
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import pool from "../config/db.js"; // conexión a MariaDB
+import {
+  createUser,
+  findUserByEmail,
+  findUserById,
+} from "../models/User.js";
+import { findRoleByName } from "../models/Role.js";
 
-// ✅ Registro
+// ✅ Registro (siempre TRABAJADOR por defecto)
 export const register = async (req, res) => {
   try {
-    const { nombre, email, password, rol } = req.body;
+    const { nombre, email, password } = req.body;
 
     if (!nombre || !email || !password) {
-      return res
-        .status(400)
-        .json({ message: "⚠️ Todos los campos son obligatorios" });
+      return res.status(400).json({ message: "⚠️ Todos los campos son obligatorios" });
     }
 
+    // Verificar si ya existe
+    const existingUser = await findUserByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ message: "⚠️ El correo ya está registrado" });
+    }
+
+    // Encriptar contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const [result] = await pool.query(
-      "INSERT INTO users (nombre, email, password, rol, estado) VALUES (?, ?, ?, ?, ?)",
-      [nombre, email, hashedPassword, rol || "TRABAJADOR", 1] // por defecto rol TRABAJADOR y estado activo
-    );
+    // Buscar rol TRABAJADOR
+    const rol = await findRoleByName("TRABAJADOR");
+    if (!rol) {
+      return res.status(500).json({ message: "⚠️ Rol TRABAJADOR no está definido en la base de datos" });
+    }
+
+    // Crear usuario directamente con role_id
+    const userId = await createUser(nombre, email, hashedPassword, rol.id);
 
     res.status(201).json({
       message: "✅ Usuario registrado correctamente",
-      userId: result.insertId,
+      userId,
     });
   } catch (error) {
-    console.error("❌ Error en register:", error); // 👈 mostramos el error completo, no solo el .message
-    res.status(500).json({
-      message: "Error al registrar usuario",
-      error: error.message,
-      sql: error.sql,            // 👈 línea del SQL que falló
-      sqlMessage: error.sqlMessage, // 👈 mensaje de MySQL/MariaDB
-    });
+    console.error("❌ Error en register:", error);
+    res.status(500).json({ message: "Error al registrar usuario", error: error.message });
   }
 };
 
-// ✅ Login
+// ✅ Login con validación de fechas y roles
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [
-      email,
-    ]);
-
-    if (rows.length === 0) {
+    const user = await findUserByEmail(email);
+    if (!user) {
       return res.status(404).json({ message: "⚠️ Usuario no encontrado" });
     }
 
-    const user = rows[0];
-
+    // Validar contraseña
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ message: "⚠️ Contraseña incorrecta" });
     }
 
+    // Validar fechas
+    const ahora = new Date();
+    if (user.fecha_inicio && new Date(user.fecha_inicio) > ahora) {
+      return res.status(403).json({ message: "⚠️ El acceso aún no está habilitado" });
+    }
+    if (user.fecha_fin && new Date(user.fecha_fin) < ahora) {
+      return res.status(403).json({ message: "⚠️ El acceso ha expirado" });
+    }
+
+    // Obtener rol directamente desde user.role_id ya unido con roles en findUserByEmail
+    const roleNombre = user.rol || "TRABAJADOR";
+
+    // Generar token
     const token = jwt.sign(
-      { id: user.id, email: user.email, rol: user.rol },
+      { id: user.id, email: user.email, rol: roleNombre },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -69,14 +87,13 @@ export const login = async (req, res) => {
         id: user.id,
         nombre: user.nombre,
         email: user.email,
-        rol: user.rol,
+        rol: roleNombre,
+        fecha_inicio: user.fecha_inicio,
+        fecha_fin: user.fecha_fin,
       },
     });
   } catch (error) {
-    console.error("❌ Error en login:", error); // mostramos objeto completo
-    res.status(500).json({
-      message: "Error al iniciar sesión",
-      error: error.message,
-    });
+    console.error("❌ Error en login:", error);
+    res.status(500).json({ message: "Error al iniciar sesión", error: error.message });
   }
 };

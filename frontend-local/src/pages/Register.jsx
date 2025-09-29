@@ -6,25 +6,23 @@ function Register() {
     nombre: "",
     email: "",
     password: "",
-    rol: "TRABAJADOR", // opcional: valor por defecto
   });
 
   const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:4000/auth/register", form);
-      setMessage(res.data.message || "Usuario registrado con éxito");
+      const res = await axios.post("http://localhost:4000/api/auth/register", form);
+      setMessage(res.data.message || "✅ Usuario registrado con éxito");
+      setForm({ nombre: "", email: "", password: "" });
     } catch (err) {
-      setMessage(err.response?.data?.message || "Error en el registro");
+      console.error("❌ Error en el registro:", err);
+      setMessage(err.response?.data?.message || "❌ Error en el registro");
     }
   };
 
@@ -39,7 +37,8 @@ function Register() {
             placeholder="Nombre"
             value={form.nombre}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            required
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
           />
           <input
             type="email"
@@ -47,7 +46,8 @@ function Register() {
             placeholder="Correo electrónico"
             value={form.email}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            required
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
           />
           <input
             type="password"
@@ -55,25 +55,25 @@ function Register() {
             placeholder="Contraseña"
             value={form.password}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            required
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
           />
-          <select
-            name="rol"
-            value={form.rol}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-          >
-            <option value="TRABAJADOR">Trabajador</option>
-            <option value="ADMIN">Administrador</option>
-          </select>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition"
           >
             Registrarse
           </button>
         </form>
-        {message && <p className="mt-4 text-center">{message}</p>}
+        {message && (
+          <p
+            className={`mt-4 text-center ${
+              message.startsWith("✅") ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {message}
+          </p>
+        )}
       </div>
     </div>
   );
