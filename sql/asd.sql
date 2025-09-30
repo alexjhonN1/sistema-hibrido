@@ -1,0 +1,1 @@
+SELECT * FROM clientessistema_hibridosistema_hibrido

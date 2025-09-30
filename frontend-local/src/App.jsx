@@ -1,50 +1,32 @@
 import "./App.css";
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Sunat from "./pages/Sunat"; 
 import Users from "./pages/Users";
+import Clientes from "./pages/Clientes"; // Nuevo módulo
 
 function App() {
   const token = localStorage.getItem("token");
 
   return (
     <Router>
-      <nav className="p-4 bg-gray-200 flex justify-between">
-        {!token ? (
-          <>
-            <Link to="/login" className="text-blue-600">Login</Link>
-            <Link to="/register" className="text-blue-600">Registro</Link>
-          </>
-        ) : (
-          <>
-            <Link to="/dashboard" className="text-blue-600">Dashboard</Link>
-            <Link to="/dashboard/sunat" className="text-blue-600">Consultas SUNAT</Link>
-          </>
-        )}
-      </nav>
-
       <Routes>
         {/* Login y Registro */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Dashboard protegido */}
-        <Route
-          path="/dashboard"
-          element={token ? <Dashboard /> : <Navigate to="/login" />}
-        />
-
-        {/* Módulo Consultas SUNAT */}
-        <Route
-          path="/dashboard/sunat"
-          element={token ? <Sunat /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/dashboard/users"
-          element={token ? <Users /> : <Navigate to="/login" />}
-        />
+        {/* Dashboard con rutas hijas */}
+        <Route 
+          path="/dashboard/*" 
+          element={token ? <Dashboard /> : <Navigate to="/login" />} 
+        >
+          <Route path="users" element={<Users />} />
+          <Route path="sunat" element={<Sunat />} />
+          <Route path="clientes" element={<Clientes />} />
+          {/* Aquí se pueden agregar más rutas hijas */}
+        </Route>
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to={token ? "/dashboard" : "/login"} />} />
