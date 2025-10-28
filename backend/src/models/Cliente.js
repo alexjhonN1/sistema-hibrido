@@ -1,35 +1,31 @@
-import pool from "../config/db.js";
+import { Router } from "express";
+import { verificarToken, verificarRol } from "../middleware/auth.middleware.js";
+import { registrarCliente, listarClientes, listarClientesPorCodigo } from "../controllers/clientes.controller.js";
 
-// Crear cliente
-export const createCliente = async ({ nombre, ruc, direccion, telefono }) => {
-  const [result] = await pool.query(
-    "INSERT INTO clientes (nombre, ruc, direccion, telefono) VALUES (?, ?, ?, ?)",
-    [nombre, ruc, direccion, telefono]
-  );
-  return result.insertId;
-};
+const router = Router();
 
-// Listar clientes
-export const getAllClientes = async () => {
-  const [rows] = await pool.query("SELECT * FROM clientes");
-  return rows;
-};
+// Registrar cliente (ADMIN/TRABAJADOR)
+router.post(
+  "/clientes",
+  verificarToken,
+  verificarRol(["ADMIN", "TRABAJADOR"]),
+  registrarCliente
+);
 
-// Buscar cliente
-export const findClienteById = async (id) => {
-  const [rows] = await pool.query("SELECT * FROM clientes WHERE id = ?", [id]);
-  return rows[0];
-};
+// Listar todos los clientes
+router.get(
+  "/clientes",
+  verificarToken,
+  verificarRol(["ADMIN", "TRABAJADOR"]),
+  listarClientes
+);
 
-// Actualizar cliente
-export const updateClienteById = async (id, { nombre, ruc, direccion, telefono }) => {
-  await pool.query(
-    "UPDATE clientes SET nombre=?, ruc=?, direccion=?, telefono=? WHERE id=?",
-    [nombre, ruc, direccion, telefono, id]
-  );
-};
+// Listar clientes por código 0-9
+router.get(
+  "/clientes/codigo/:codigo",
+  verificarToken,
+  verificarRol(["ADMIN", "TRABAJADOR"]),
+  listarClientesPorCodigo
+);
 
-// Eliminar cliente
-export const deleteClienteById = async (id) => {
-  await pool.query("DELETE FROM clientes WHERE id=?", [id]);
-};
+export default router;

@@ -29,6 +29,21 @@ CREATE TABLE IF NOT EXISTS `acciones_sunat` (
 
 -- La exportación de datos fue deseleccionada.
 
+-- Volcando estructura para tabla sistema_hibrido.clientes
+CREATE TABLE IF NOT EXISTS `clientes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(150) NOT NULL,
+  `ruc` varchar(20) NOT NULL,
+  `rubro` varchar(100) DEFAULT NULL,
+  `codigo` tinyint(1) DEFAULT 0,
+  `estado` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ruc` (`ruc`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- La exportación de datos fue deseleccionada.
+
 -- Volcando estructura para tabla sistema_hibrido.historial_sunat
 CREATE TABLE IF NOT EXISTS `historial_sunat` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
